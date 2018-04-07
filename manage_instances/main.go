@@ -4,6 +4,7 @@ import (
 	"fmt"
 	_ "fmt"
 	"github.com/aws/aws-sdk-go/aws"
+	_ "github.com/olivere/elastic"
 	_ "github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -53,14 +54,15 @@ func main() {
 	// }
 
 	var cpuPercent int8
-	var durationMA int8 = 10
+	var durationMA int16 = 200
 	var totalMA float32
 	var standardDeviation float32
 	var coefficientVar int8
 
 	valuesMA := make([]int8, durationMA, durationMA)
+	for i := range valuesMA { valuesMA[i] = 20 }
 
-	for timer := 0; timer < 60; timer++ {
+	for timer := 0; timer < 36000; timer++ {
 
 		d := GetCpuPercent()
 
@@ -71,8 +73,13 @@ func main() {
 		coefficientVar = int8(standardDeviation / totalMA * 100)
 		coefficientVar = int8(math.Abs(float64(coefficientVar)))
 
+		if int16(timer) > durationMA {
+			fmt.Println("Active")
+		} else {
+			fmt.Println("Not active")
+		}
 		fmt.Printf("Current CPU: %v%%\n", cpuPercent)
-		fmt.Println("SMA:", totalMA)
+		fmt.Printf("SMA: %v%%\n", totalMA)
 		fmt.Println("STD:", standardDeviation)
 		fmt.Printf("CV: %v%%\n\n", coefficientVar)
 
